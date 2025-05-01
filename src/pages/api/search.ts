@@ -20,7 +20,7 @@ async function convertNaturalLanguageToArtsyParams(
   }
   const client = new GoogleGenerativeAI(apiKey);
   const model = client.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.0-flash-lite",
     systemInstruction:
       "You are an assistant that converts user requests into structured parameters for searching artworks on Artsy using the provided tool. Only use the tool to respond.",
   });
