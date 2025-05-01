@@ -1,6 +1,7 @@
 import { specialGothicExpandedOne, switzer } from '@/utils/fonts';
+import { getContrastTextColor, getDominantColor } from '@/utils/helpers';
 import { Button, Input } from '@headlessui/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TbArrowUpRight, TbLoader2, TbSparkles } from 'react-icons/tb';
 
 // Define a type for the artwork data structure you expect back
@@ -79,22 +80,38 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    async function getArtworkButtonColors() {
+      if (results.length > 0) {
+        const colors = await Promise.all(results.map((result) => getDominantColor(result.node.image?.url || '')));
+
+        const artworkButtons = document.querySelectorAll('.artsy-button');
+        artworkButtons.forEach((artworkButton, index) => {
+          (artworkButton as HTMLAnchorElement).style.backgroundColor = colors[index];
+          (artworkButton as HTMLAnchorElement).style.color = getContrastTextColor(colors[index]);
+        });
+      }
+    }
+
+    getArtworkButtonColors();
+  }, [results]);
+
   return (
     <main className={`${switzer.className} min-h-dvh flex flex-col items-center ${isFirstSearch ? 'justify-center' : 'justify-start'}`}>
       <div className={`flex flex-col items-center p-6 gap-8 max-w-[1024px]`}>
-        <div className="flex flex-col border-4 -rotate-1 p-5 min-w-xl max-w-2xl gap-6 bg-blue-200">
-          <h1 className={`${specialGothicExpandedOne.className} uppercase text-4xl md:text-5xl lg:text-6xl`}>Curato</h1>
-          <h2 className="md:text-lg lg:text-xl -mt-4 font-bold">Smarter Way to Discover Art.</h2>
-          <form onSubmit={handleSubmit} className="flex gap-4">
+        <div className="flex flex-col border-4 -rotate-1 p-5 sm:min-w-lg lg:min-w-xl max-w-2xl gap-6 bg-blue-200">
+          <h1 className={`${specialGothicExpandedOne.className} uppercase text-4xl sm:text-5xl lg:text-6xl`}>Curato</h1>
+          <h2 className="text-sm sm:text-lg lg:text-xl -mt-4 font-bold">Smarter Way to Discover Art.</h2>
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row max-sm:items-center gap-4">
             <Input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Describe the art you are looking for..."
               disabled={isLoading}
-              className="border-4 p-2 w-full max-w-md font-medium bg-white"
+              className="border-4 p-2 sm:p-3 w-full max-w-md font-medium text-sm sm:text-base bg-white"
             />
-            <Button type="submit" disabled={isLoading} className="rotate-2 flex cursor-pointer bg-blue-500 hover:bg-blue-600 border-4 border-black p-3 text-lg font-bold text-white transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <Button type="submit" disabled={isLoading} className="w-fit rotate-2 flex cursor-pointer bg-blue-500 hover:bg-blue-600 border-4 border-black p-2 sm:p-3 sm:text-lg font-bold text-white transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               {isLoading ?
                 <>
                   Searching...
@@ -133,7 +150,7 @@ export default function Home() {
                     <p className="text-sm mt-3 italic">{node.medium}</p>
                   </div>
                   <div className="flex w-full justify-end mt-6">
-                    <a href={`https://www.artsy.net/artwork/${node.slug}`} target="_blank" rel="noopener noreferrer" className="rotate-1 flex w-fit cursor-pointer bg-blue-500 hover:bg-blue-600 border-4 border-black p-3 text-md font-bold text-white transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <a href={`https://www.artsy.net/artwork/${node.slug}`} target="_blank" rel="noopener noreferrer" className="artsy-button rotate-1 flex w-fit cursor-pointer hover:brightness-95 border-4 border-black p-3 text-md font-bold text-white transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                       View on Artsy
                       <TbArrowUpRight className="inline-block ml-2" size={24} />
                     </a>
