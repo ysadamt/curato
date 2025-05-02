@@ -167,7 +167,7 @@ export default function Home() {
             <PopoverButton className="absolute right-0 rotate-2 flex w-fit cursor-pointer hover:brightness-95 border-4 border-black p-2 text-md font-bold bg-white text-black transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <TbInfoCircleFilled size={24} />
             </PopoverButton>
-            <PopoverPanel anchor="bottom end" transition className="flex flex-col bg-white p-4 border-4 border-black w-[225px] sm:w-[250px] mt-4 rotate-1 transition duration-200 ease-in-out data-closed:-translate-y-1 data-closed:opacity-0">
+            <PopoverPanel anchor="bottom end" transition className="flex flex-col bg-white p-4 border-4 border-black w-[225px] sm:w-[250px] mt-4 transition duration-200 ease-in-out data-closed:-translate-y-1 data-closed:opacity-0">
               <p className="text-sm sm:text-base font-medium">
                 Experience AI-powered art discovery. Powered by Google&apos;s Gemini, Curato understands your natural language requests and descriptions to intelligently search and find artwork within the extensive Artsy database.
               </p>
