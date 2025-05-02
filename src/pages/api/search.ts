@@ -34,7 +34,6 @@ async function convertNaturalLanguageToArtsyParams(
         parameters: {
           type: SchemaType.OBJECT,
           properties: {
-            // Match these properties closely with Artsy's artworksConnection filter arguments
             artistIDs: {
               type: SchemaType.ARRAY,
               items: { type: SchemaType.STRING },
@@ -78,10 +77,7 @@ async function convertNaturalLanguageToArtsyParams(
               description:
                 "A price range string like '1000-5000' or '*-10000' (for under 10k), if mentioned by user.",
             },
-            // Add other relevant Artsy parameters based on their schema and common user queries
-            // See: https://metaphysics-production.artsy.net/ (use introspection tool like GraphiQL)
           },
-          // Adjust required field(s) based on typical queries. Keyword is a safe fallback.
           required: ["keyword"],
         },
       },

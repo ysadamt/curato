@@ -65,11 +65,11 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFirstSearch, setIsFirstSearch] = useState(true);
-  const [isOnCooldown, setIsOnCooldown] = useState(false); // State for cooldown status
-  const [cooldownTime, setCooldownTime] = useState(0); // State for remaining cooldown time
+  const [isOnCooldown, setIsOnCooldown] = useState(false);
+  const [cooldownTime, setCooldownTime] = useState(0);
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const [colorThemeIndex, _] = useState(Math.floor(Math.random() * BG_COLOR_THEMES.length));
-  const cooldownIntervalRef = useRef<NodeJS.Timeout | null>(null); // Ref to store interval ID
+  const cooldownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -77,7 +77,7 @@ export default function Home() {
 
     setIsLoading(true);
     setError(null);
-    setResults([]); // Clear previous results
+    setResults([]);
 
     try {
       const response = await fetch('/api/search', {
@@ -113,9 +113,8 @@ export default function Home() {
 
   const startCooldown = () => {
     setIsOnCooldown(true);
-    setCooldownTime(5); // Set cooldown duration to 5 seconds
+    setCooldownTime(5);
 
-    // Clear any existing interval before starting a new one
     if (cooldownIntervalRef.current) {
       clearInterval(cooldownIntervalRef.current);
     }
@@ -123,16 +122,14 @@ export default function Home() {
     cooldownIntervalRef.current = setInterval(() => {
       setCooldownTime((prevTime) => {
         if (prevTime <= 1) {
-          // When time reaches 0, clear interval and reset cooldown state
           clearInterval(cooldownIntervalRef.current as NodeJS.Timeout);
           cooldownIntervalRef.current = null;
           setIsOnCooldown(false);
           return 0;
         }
-        // Decrement time
         return prevTime - 1;
       });
-    }, 1000); // Update every second
+    }, 1000);
   };
 
   useEffect(() => {
@@ -188,7 +185,7 @@ export default function Home() {
             />
             <Button
               type="submit"
-              disabled={isLoading || isOnCooldown} // Disable button during loading or cooldown
+              disabled={isLoading || isOnCooldown}
               className={`rotate-2 flex items-center justify-center cursor-pointer ${BUTTON_COLOR_THEMES[colorThemeIndex]} ${BUTTON_HOVER_COLOR_THEMES[colorThemeIndex]} border-4 border-black p-2 sm:p-3 sm:text-lg font-bold ${BUTTON_COLOR_THEMES[colorThemeIndex].startsWith('bg-yellow') ? 'text-black' : 'text-white'} transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:opacity-80 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none`}
             >
               {isLoading ? (
@@ -216,8 +213,14 @@ export default function Home() {
         {!isFirstSearch &&
           <div className="flex flex-col items-center mt-4 gap-4">
             <h2 className={`${specialGothicExpandedOne.className} uppercase text-2xl md:text-3xl lg:text-4xl`}>Search Results</h2>
+            {isLoading && !error &&
+              <div className="mt-8 flex flex-col items-center gap-2">
+                <TbLoader2 className="inline-block animate-spin mb-2" size={64} />
+                <p className="text-sm sm:text-base font-semibold">Loading...</p>
+              </div>
+            }
             {results.length === 0 && !isLoading && !error &&
-              <div className="border-4 p-4 flex flex-col items-center gap-2 transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="mt-4 border-4 p-4 flex flex-col items-center gap-2 transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 <TbZoomCancel className="inline-block mb-2" size={64} />
                 <p className="text-sm sm:text-base font-semibold">No results found.</p>
               </div>
