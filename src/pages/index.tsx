@@ -1,8 +1,8 @@
 import { specialGothicExpandedOne, switzer } from '@/utils/fonts';
-import { getContrastTextColor, getDominantColor } from '@/utils/helpers';
+import { getContrastTextColor, getDominantColor, isValidRgbValue } from '@/utils/helpers';
 import { Button, Input, Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
 import { useEffect, useRef, useState } from 'react';
-import { TbArrowUpRight, TbInfoCircleFilled, TbLoader2, TbSparkles, TbStopwatch, TbZoomCancel } from 'react-icons/tb';
+import { TbArrowUpRight, TbInfoCircleFilled, TbLoader2, TbPlus, TbSparkles, TbStopwatch, TbZoomCancel } from 'react-icons/tb';
 
 interface ArtworkNode {
   internalID: string;
@@ -63,6 +63,7 @@ export default function Home() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ArtworkEdge[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFirstSearch, setIsFirstSearch] = useState(true);
   const [isOnCooldown, setIsOnCooldown] = useState(false);
@@ -70,6 +71,8 @@ export default function Home() {
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const [colorThemeIndex, _] = useState(Math.floor(Math.random() * BG_COLOR_THEMES.length));
   const cooldownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [endCursor, setEndCursor] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -78,6 +81,8 @@ export default function Home() {
     setIsLoading(true);
     setError(null);
     setResults([]);
+    setHasNextPage(false);
+    setEndCursor(null);
 
     try {
       const response = await fetch('/api/search', {
@@ -96,18 +101,71 @@ export default function Home() {
 
       if (data.artworksConnection?.edges) {
         setResults(data.artworksConnection.edges);
+        setHasNextPage(data.artworksConnection.pageInfo.hasNextPage);
+        setEndCursor(data.artworksConnection.pageInfo.endCursor);
       } else {
         setResults([]);
+        setHasNextPage(false);
+        setEndCursor(null);
         console.log("No artwork edges found in response:", data);
       }
 
     } catch (err: any) {
       console.error("Failed to fetch artworks:", err);
       setError(err.message || 'Failed to fetch results.');
+      setResults([]);
+      setHasNextPage(false);
+      setEndCursor(null);
     } finally {
       setIsLoading(false);
       setIsFirstSearch(false);
       startCooldown();
+    }
+  };
+
+  const handleLoadMore = async () => {
+    if (isLoadingMore || !hasNextPage || !endCursor || !query) return;
+
+    setIsLoadingMore(true);
+    setError(null); // Clear previous errors if any
+
+    try {
+      const response = await fetch('/api/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Send the original query AND the endCursor for pagination
+        body: JSON.stringify({ query, after: endCursor }),
+      });
+
+      const data: ArtsyApiResponse = await response.json();
+
+      if (!response.ok || data.error) {
+        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+      }
+
+      if (data.artworksConnection?.edges) {
+        // Append new results to the existing ones
+        setResults(prevResults => [...prevResults, ...data.artworksConnection!.edges]);
+        // Update pagination info
+        setHasNextPage(data.artworksConnection.pageInfo.hasNextPage);
+        setEndCursor(data.artworksConnection.pageInfo.endCursor);
+      } else {
+        // If no more edges are returned, stop pagination
+        setHasNextPage(false);
+        setEndCursor(null);
+        console.log("No more artwork edges found in load more response:", data);
+      }
+
+    } catch (err: any) {
+      console.error("Failed to load more artworks:", err);
+      // Display error, but don't clear existing results
+      setError(err.message || 'Failed to load more results.');
+      // Optionally stop trying to load more if there's an error
+      setHasNextPage(false);
+    } finally {
+      setIsLoadingMore(false);
     }
   };
 
@@ -147,8 +205,13 @@ export default function Home() {
 
         const artworkButtons = document.querySelectorAll('.artsy-button');
         artworkButtons.forEach((artworkButton, index) => {
-          (artworkButton as HTMLAnchorElement).style.backgroundColor = colors[index];
-          (artworkButton as HTMLAnchorElement).style.color = getContrastTextColor(colors[index]);
+          if (!isValidRgbValue(colors[index])) {
+            (artworkButton as HTMLAnchorElement).style.backgroundColor = 'white';
+            (artworkButton as HTMLAnchorElement).style.color = 'black';
+          } else {
+            (artworkButton as HTMLAnchorElement).style.backgroundColor = colors[index];
+            (artworkButton as HTMLAnchorElement).style.color = getContrastTextColor(colors[index]);
+          }
         });
       }
     }
@@ -236,7 +299,7 @@ export default function Home() {
                     />
                   )}
                   <div className="flex flex-col">
-                    <h3 className={`${specialGothicExpandedOne.className} text-xl md:text-2xl`}>{node.title || 'Untitled'}</h3>
+                    <h3 className={`${specialGothicExpandedOne.className} text-xl md:text-2xl line-clamp-3`}>{node.title || 'Untitled'}</h3>
                     <p className="text-base md:text-lg font-semibold">{node.artists?.map(a => a.name).join(', ') || 'Unknown Artist'}</p>
                     <p className="font-medium">{node.date}</p>
                     <p className="text-sm mt-3 italic">{node.medium}</p>
@@ -249,6 +312,28 @@ export default function Home() {
                   </div>
                 </div>
               ))}
+            </div>
+            {/* Show More Button Area */}
+            <div className="mt-8 w-full flex justify-center"> {/* Centered container for the button */}
+              {hasNextPage && !isLoading && ( // Show button if there's a next page and not initial loading
+                <Button
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                  className={`flex items-center justify-center cursor-pointer ${BUTTON_COLOR_THEMES[colorThemeIndex]} ${BUTTON_HOVER_COLOR_THEMES[colorThemeIndex]} border-4 border-black p-3 sm:text-lg font-bold ${BUTTON_COLOR_THEMES[colorThemeIndex].startsWith('bg-yellow') ? 'text-black' : 'text-white'} transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:opacity-80 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none rounded w-full max-w-xs sm:max-w-sm`} // Added rounded, width constraints
+                >
+                  {isLoadingMore ? (
+                    <>
+                      Loading More...
+                      <TbLoader2 className="inline-block ml-2 animate-spin" size={24} />
+                    </>
+                  ) : (
+                    <>
+                      Show More
+                      <TbPlus className="inline-block ml-2" size={24} />
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           </div>
         }

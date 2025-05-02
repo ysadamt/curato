@@ -109,3 +109,18 @@ export function getContrastTextColor(rgbColor: string): "black" | "white" {
   // If luminance is < 128, the color is perceived as "dark", use white text.
   return luminance >= 128 ? "black" : "white";
 }
+
+export function isValidRgbValue(value: string): boolean {
+  const rgbPattern = /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/;
+  const match = value.match(rgbPattern);
+
+  if (!match) {
+    return false;
+  }
+
+  const r = parseInt(match[1], 10);
+  const g = parseInt(match[2], 10);
+  const b = parseInt(match[3], 10);
+
+  return r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255;
+}
