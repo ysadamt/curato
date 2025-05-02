@@ -2,7 +2,7 @@ import { specialGothicExpandedOne, switzer } from '@/utils/fonts';
 import { getContrastTextColor, getDominantColor, isValidRgbValue } from '@/utils/helpers';
 import { Button, Input, Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
 import { useEffect, useRef, useState } from 'react';
-import { TbArrowUpRight, TbInfoCircleFilled, TbLoader2, TbPlus, TbSparkles, TbStopwatch, TbZoomCancel } from 'react-icons/tb';
+import { TbArrowUpRight, TbInfoCircleFilled, TbLibraryPlus, TbLoader2, TbPlus, TbSparkles, TbStopwatch, TbZoomCancel } from 'react-icons/tb';
 
 interface ArtworkNode {
   internalID: string;
@@ -305,7 +305,7 @@ export default function Home() {
                     <p className="text-sm mt-3 italic">{node.medium}</p>
                   </div>
                   <div className="flex w-full justify-end mt-6">
-                    <a href={`https://www.artsy.net/artwork/${node.slug}`} target="_blank" rel="noopener noreferrer" className="artsy-button rotate-1 flex w-fit cursor-pointer hover:brightness-95 border-4 border-black p-3 text-md font-bold text-white transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <a href={`https://www.artsy.net/artwork/${node.slug}`} target="_blank" rel="noopener noreferrer" className="artsy-button rotate-1 flex w-fit cursor-pointer hover:brightness-95 border-4 border-black p-3 font-bold text-white transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                       View on Artsy
                       <TbArrowUpRight className="inline-block ml-2" size={24} />
                     </a>
@@ -319,7 +319,7 @@ export default function Home() {
                 <Button
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
-                  className={`flex items-center justify-center cursor-pointer ${BUTTON_COLOR_THEMES[colorThemeIndex]} ${BUTTON_HOVER_COLOR_THEMES[colorThemeIndex]} border-4 border-black p-3 sm:text-lg font-bold ${BUTTON_COLOR_THEMES[colorThemeIndex].startsWith('bg-yellow') ? 'text-black' : 'text-white'} transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:opacity-80 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none rounded w-full max-w-xs sm:max-w-sm`} // Added rounded, width constraints
+                  className={`flex items-center justify-center cursor-pointer ${BUTTON_COLOR_THEMES[colorThemeIndex]} ${BUTTON_HOVER_COLOR_THEMES[colorThemeIndex]} border-4 border-black p-3 font-bold ${BUTTON_COLOR_THEMES[colorThemeIndex].startsWith('bg-yellow') ? 'text-black' : 'text-white'} transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:opacity-80 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none rounded w-full max-w-xs sm:max-w-sm`} // Added rounded, width constraints
                 >
                   {isLoadingMore ? (
                     <>
@@ -329,7 +329,7 @@ export default function Home() {
                   ) : (
                     <>
                       Show More
-                      <TbPlus className="inline-block ml-2" size={24} />
+                      <TbLibraryPlus className="inline-block ml-2" size={24} />
                     </>
                   )}
                 </Button>
