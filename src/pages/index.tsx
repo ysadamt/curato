@@ -83,7 +83,6 @@ export default function Home({ colorThemeIndex }: InferGetServerSidePropsType<ty
   const [isFirstSearch, setIsFirstSearch] = useState(true);
   const [isOnCooldown, setIsOnCooldown] = useState(false);
   const [cooldownTime, setCooldownTime] = useState(0);
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const cooldownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [endCursor, setEndCursor] = useState<string | null>(null);
@@ -210,10 +209,6 @@ export default function Home({ colorThemeIndex }: InferGetServerSidePropsType<ty
         clearInterval(cooldownIntervalRef.current);
       }
     };
-  }, []);
-
-  useEffect(() => {
-    console.log(colorThemeIndex);
   }, []);
 
   useEffect(() => {
