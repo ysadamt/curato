@@ -2,7 +2,7 @@ import { specialGothicExpandedOne, switzer } from '@/utils/fonts';
 import { getContrastTextColor, getDominantColor, isValidRgbValue } from '@/utils/helpers';
 import { Button, Input, Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
 import { useEffect, useRef, useState } from 'react';
-import { TbArrowUpRight, TbInfoCircleFilled, TbLibraryPlus, TbLoader2, TbPlus, TbSparkles, TbStopwatch, TbZoomCancel } from 'react-icons/tb';
+import { TbArrowUpRight, TbInfoCircleFilled, TbLibraryPlus, TbLoader2, TbSparkles, TbStopwatch, TbZoomCancel } from 'react-icons/tb';
 
 interface ArtworkNode {
   internalID: string;
