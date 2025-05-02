@@ -1,8 +1,8 @@
 import { specialGothicExpandedOne, switzer } from '@/utils/fonts';
 import { getContrastTextColor, getDominantColor } from '@/utils/helpers';
-import { Button, Input } from '@headlessui/react';
+import { Button, Input, Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
 import { useEffect, useRef, useState } from 'react';
-import { TbArrowUpRight, TbLoader2, TbSparkles, TbStopwatch } from 'react-icons/tb';
+import { TbArrowUpRight, TbInfoCircleFilled, TbLoader2, TbSparkles, TbStopwatch, TbZoomCancel } from 'react-icons/tb';
 
 interface ArtworkNode {
   internalID: string;
@@ -32,6 +32,32 @@ interface ArtsyApiResponse {
   error?: string;
 }
 
+const BG_COLOR_THEMES = [
+  'bg-blue-200',
+  'bg-red-200',
+  'bg-green-200',
+  'bg-yellow-200',
+  'bg-purple-200',
+  'bg-pink-200',
+];
+
+const BUTTON_COLOR_THEMES = [
+  'bg-blue-700',
+  'bg-red-700',
+  'bg-green-700',
+  'bg-yellow-400',
+  'bg-purple-700',
+  'bg-pink-700',
+];
+
+const BUTTON_HOVER_COLOR_THEMES = [
+  'hover:bg-blue-800',
+  'hover:bg-red-800',
+  'hover:bg-green-800',
+  'hover:bg-yellow-500',
+  'hover:bg-purple-800',
+  'hover:bg-pink-800',
+];
 
 export default function Home() {
   const [query, setQuery] = useState('');
@@ -41,6 +67,8 @@ export default function Home() {
   const [isFirstSearch, setIsFirstSearch] = useState(true);
   const [isOnCooldown, setIsOnCooldown] = useState(false); // State for cooldown status
   const [cooldownTime, setCooldownTime] = useState(0); // State for remaining cooldown time
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+  const [colorThemeIndex, _] = useState(Math.floor(Math.random() * BG_COLOR_THEMES.length));
   const cooldownIntervalRef = useRef<NodeJS.Timeout | null>(null); // Ref to store interval ID
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -85,7 +113,7 @@ export default function Home() {
 
   const startCooldown = () => {
     setIsOnCooldown(true);
-    setCooldownTime(3); // Set cooldown duration to 5 seconds
+    setCooldownTime(5); // Set cooldown duration to 5 seconds
 
     // Clear any existing interval before starting a new one
     if (cooldownIntervalRef.current) {
@@ -133,8 +161,18 @@ export default function Home() {
 
   return (
     <main className={`${switzer.className} min-h-dvh flex flex-col items-center ${isFirstSearch ? 'justify-center' : 'justify-start'}`}>
-      <div className={`flex flex-col items-center p-6 gap-8 max-w-[1024px]`}>
-        <div className="flex flex-col border-4 -rotate-1 p-5 sm:min-w-lg lg:min-w-xl max-w-2xl gap-6 bg-blue-200">
+      <div className={`flex flex-col items-center p-6 gap-8 w-full max-w-[1024px]`}>
+        <div className={`flex flex-col border-4 -rotate-1 p-5 min-w-full sm:min-w-lg lg:min-w-xl max-w-2xl gap-6 ${BG_COLOR_THEMES[colorThemeIndex]} relative`}>
+          <Popover className="relative">
+            <PopoverButton className="absolute right-0 rotate-2 flex w-fit cursor-pointer hover:brightness-95 border-4 border-black p-2 text-md font-bold bg-white text-black transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <TbInfoCircleFilled size={24} />
+            </PopoverButton>
+            <PopoverPanel anchor="bottom end" transition className="flex flex-col bg-white p-4 border-4 border-black w-[225px] sm:w-[250px] mt-4 rotate-1 transition duration-200 ease-in-out data-closed:-translate-y-1 data-closed:opacity-0">
+              <p className="text-sm sm:text-base font-medium">
+                Experience AI-powered art discovery. Powered by Google&apos;s Gemini, Curato understands your natural language requests and descriptions to intelligently search and find artwork within the extensive Artsy database.
+              </p>
+            </PopoverPanel>
+          </Popover>
           <h1 className={`${specialGothicExpandedOne.className} uppercase text-4xl sm:text-5xl lg:text-6xl`}>Curato</h1>
           <h2 className="text-sm sm:text-lg lg:text-xl -mt-4 font-bold">Smarter Way to Discover Art.</h2>
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row max-sm:items-center gap-4">
@@ -144,12 +182,12 @@ export default function Home() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Describe the art you are looking for..."
               disabled={isLoading}
-              className="border-4 p-2 sm:p-3 w-full max-w-md font-medium text-sm sm:text-base bg-white"
+              className="border-4 p-2 sm:p-3 w-full sm:max-w-md font-medium text-sm sm:text-base bg-white"
             />
             <Button
               type="submit"
               disabled={isLoading || isOnCooldown} // Disable button during loading or cooldown
-              className={`rotate-2 flex items-center justify-center cursor-pointer bg-blue-500 hover:bg-blue-600 border-4 border-black p-2 sm:p-3 sm:text-lg font-bold text-white transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:opacity-75 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none`}
+              className={`rotate-2 flex items-center justify-center cursor-pointer ${BUTTON_COLOR_THEMES[colorThemeIndex]} ${BUTTON_HOVER_COLOR_THEMES[colorThemeIndex]} border-4 border-black p-2 sm:p-3 sm:text-lg font-bold ${BUTTON_COLOR_THEMES[colorThemeIndex].startsWith('bg-yellow') ? 'text-black' : 'text-white'} transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:opacity-80 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none`}
             >
               {isLoading ? (
                 <>
@@ -176,8 +214,13 @@ export default function Home() {
         {!isFirstSearch &&
           <div className="flex flex-col items-center mt-4 gap-4">
             <h2 className={`${specialGothicExpandedOne.className} uppercase text-2xl md:text-3xl lg:text-4xl`}>Search Results</h2>
-            {results.length === 0 && !isLoading && !error && <p>No results found.</p>}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4">
+            {results.length === 0 && !isLoading && !error &&
+              <div className="border-4 p-4 flex flex-col items-center gap-2 transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <TbZoomCancel className="inline-block mb-2" size={64} />
+                <p className="text-sm sm:text-base font-semibold">No results found.</p>
+              </div>
+            }
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-1 sm:mt-4">
               {results.map(({ node }) => (
                 <div key={node.internalID} className="border-4 p-4 flex flex-col justify-between gap-2 transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                   {node.image?.url && (
