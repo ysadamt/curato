@@ -1,11 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { GoogleGenerativeAI, SchemaType, Tool } from "@google/generative-ai";
 
-// --- Interfaces remain the same ---
 interface ArtsyApiSuccessData {
   artworksConnection?: {
     edges: any[];
-    pageInfo: any; // Make sure pageInfo is always included
+    pageInfo: any;
   } | null;
 }
 
@@ -13,20 +12,16 @@ interface ErrorResponse {
   error: string;
 }
 
-// --- convertNaturalLanguageToArtsyParams remains the same ---
 async function convertNaturalLanguageToArtsyParams(
   query: string
 ): Promise<Record<string, any>> {
-  // ... (keep existing implementation)
-  // No changes needed here for pagination itself, as it only generates
-  // the *filters*, not the pagination cursor.
   const apiKey = process.env.GOOGLE_API_KEY;
   if (!apiKey) {
     throw new Error("API key is not defined");
   }
   const client = new GoogleGenerativeAI(apiKey);
   const model = client.getGenerativeModel({
-    model: "gemini-1.5-flash", // Updated model name if needed
+    model: "gemini-2.0-flash-lite",
     systemInstruction:
       "You are an assistant that converts user requests into structured parameters for searching artworks on Artsy using the provided tool. Only use the tool to respond.",
   });
@@ -174,10 +169,9 @@ async function convertNaturalLanguageToArtsyParams(
   }
 }
 
-// --- queryArtsy: Modified to accept and use the 'after' cursor ---
 async function queryArtsy(
   params: Record<string, any>,
-  after?: string | null // Optional 'after' cursor parameter
+  after?: string | null
 ): Promise<any> {
   const token = process.env.ARTSY_ACCESS_TOKEN!;
   const userId = process.env.ARTSY_USER_ID!;
@@ -186,7 +180,7 @@ async function queryArtsy(
     throw new Error("Artsy API token or URL is not defined");
   }
 
-  // Build filter arguments (same as before)
+  // Build filter arguments
   const filterArgs = Object.entries(params)
     .map(([key, value]) => {
       if (
@@ -255,14 +249,14 @@ async function queryArtsy(
   };
 
   console.log("Executing Artsy Query:", graphqlQuery.query);
-  console.log("With Variables:", graphqlQuery.variables); // Log variables too
+  console.log("With Variables:", graphqlQuery.variables);
 
   const response = await fetch(artsyApiUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "x-access-token": token,
-      "x-user-id": userId, // Include user ID if required by your Artsy setup
+      "x-user-id": userId,
     },
     body: JSON.stringify(graphqlQuery),
   });
@@ -270,7 +264,6 @@ async function queryArtsy(
   if (!response.ok) {
     const errorBody = await response.text();
     console.error(`Artsy API Error (${response.status}): ${errorBody}`);
-    // Try to parse error for more details if possible
     try {
       const errorJson = JSON.parse(errorBody);
       if (errorJson.errors) {
@@ -287,7 +280,6 @@ async function queryArtsy(
 
   const result = await response.json();
 
-  // Check for GraphQL errors returned in the JSON body even with a 200 OK status
   if (result.errors) {
     console.error("Artsy GraphQL Errors:", result.errors);
     throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
@@ -308,7 +300,6 @@ async function queryArtsy(
   return result.data;
 }
 
-// --- Main API Handler: Modified to accept 'after' cursor ---
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ArtsyApiSuccessData | ErrorResponse>
@@ -319,13 +310,11 @@ export default async function handler(
   }
 
   try {
-    // Destructure query and the optional 'after' cursor from the body
     const { query, after } = req.body;
 
     if (!query || typeof query !== "string" || query.trim() === "") {
       return res.status(400).json({ error: "Invalid or empty query provided" });
     }
-    // Validate 'after' cursor if present (basic type check)
     if (after && typeof after !== "string") {
       return res.status(400).json({ error: "Invalid 'after' cursor provided" });
     }
@@ -333,17 +322,13 @@ export default async function handler(
     // Convert natural language query to Artsy parameters using Gemini
     // This happens for both initial search and subsequent 'load more' calls,
     // ensuring the filters remain consistent.
-    // A potential optimization could be to cache or pass these params,
-    // but this approach is simpler given the current structure.
     const artsyParams = await convertNaturalLanguageToArtsyParams(query);
 
-    // Perform the Artsy query, passing the parameters AND the 'after' cursor (if it exists)
     const artsyData = await queryArtsy(artsyParams, after || null); // Pass null if after is undefined/falsy
 
     return res.status(200).json(artsyData);
   } catch (error: any) {
     console.error("[API SEARCH HANDLER ERROR]:", error);
-    // Ensure a generic error message in production if needed
     return res
       .status(500)
       .json({ error: error.message || "An internal server error occurred" });

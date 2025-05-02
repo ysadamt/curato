@@ -1,8 +1,9 @@
 import { specialGothicExpandedOne, switzer } from '@/utils/fonts';
 import { getContrastTextColor, getDominantColor, isValidRgbValue } from '@/utils/helpers';
 import { Button, Input, Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { useEffect, useRef, useState } from 'react';
-import { TbArrowUpRight, TbInfoCircleFilled, TbLibraryPlus, TbLoader2, TbSparkles, TbStopwatch, TbZoomCancel } from 'react-icons/tb';
+import { TbArrowUpRight, TbInfoCircleFilled, TbPlus, TbLoader2, TbSparkles, TbStopwatch, TbZoomCancel } from 'react-icons/tb';
 
 interface ArtworkNode {
   internalID: string;
@@ -32,6 +33,10 @@ interface ArtsyApiResponse {
   error?: string;
 }
 
+interface HomeProps {
+  colorThemeIndex: number;
+}
+
 const BG_COLOR_THEMES = [
   'bg-blue-200',
   'bg-red-200',
@@ -59,7 +64,17 @@ const BUTTON_HOVER_COLOR_THEMES = [
   'hover:bg-pink-800',
 ];
 
-export default function Home() {
+export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
+  const randomIndex = Math.floor(Math.random() * BG_COLOR_THEMES.length);
+
+  return {
+    props: {
+      colorThemeIndex: randomIndex,
+    },
+  };
+};
+
+export default function Home({ colorThemeIndex }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ArtworkEdge[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,7 +84,6 @@ export default function Home() {
   const [isOnCooldown, setIsOnCooldown] = useState(false);
   const [cooldownTime, setCooldownTime] = useState(0);
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-  const [colorThemeIndex, _] = useState(Math.floor(Math.random() * BG_COLOR_THEMES.length));
   const cooldownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [endCursor, setEndCursor] = useState<string | null>(null);
@@ -199,6 +213,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    console.log(colorThemeIndex);
+  }, []);
+
+  useEffect(() => {
     async function getArtworkButtonColors() {
       if (results.length > 0) {
         const colors = await Promise.all(results.map((result) => getDominantColor(result.node.image?.url || '')));
@@ -228,10 +246,11 @@ export default function Home() {
               <PopoverButton className="absolute right-0 rotate-2 flex w-fit cursor-pointer hover:brightness-95 border-4 border-black p-2 text-md font-bold bg-white text-black transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 <TbInfoCircleFilled size={24} />
               </PopoverButton>
-              <PopoverPanel anchor="bottom end" transition className="flex flex-col bg-white p-4 border-4 border-black w-[225px] sm:w-[250px] mt-4 transition duration-200 ease-in-out data-closed:-translate-y-1 data-closed:opacity-0">
-                <p className="text-sm sm:text-base font-medium">
-                  Experience AI-powered art discovery. Powered by Google&apos;s Gemini, Curato understands your natural language requests and descriptions to intelligently search and find artwork within the extensive Artsy database.
+              <PopoverPanel anchor="bottom end" transition className="font-medium gap-3 sm:gap-4 flex flex-col bg-white p-4 border-4 border-black w-[225px] sm:w-[250px] mt-4 transition duration-200 ease-in-out data-closed:-translate-y-1 data-closed:opacity-0">
+                <p className="text-sm sm:text-base">
+                  Experience AI-powered art discovery. Powered by Google&apos;s Gemini, Curato understands your natural language descriptions to intelligently search and find artwork within the extensive Artsy database.
                 </p>
+                <p className="text-xs sm:text-xs text-end">Made with ❤️ by <a href="https://ysadamt.com" target="_blank" rel="noopener noreferrer" className="underline hover:opacity-75 transition-opacity">Adam Teo</a></p>
               </PopoverPanel>
             </Popover>
           </div>
@@ -279,7 +298,7 @@ export default function Home() {
             {isLoading && !error &&
               <div className="mt-8 flex flex-col items-center gap-2">
                 <TbLoader2 className="inline-block animate-spin mb-2" size={64} />
-                <p className="text-sm sm:text-base font-semibold">Loading...</p>
+                <p className="text-sm sm:text-base font-semibold">Searching for artworks...</p>
               </div>
             }
             {results.length === 0 && !isLoading && !error &&
@@ -313,13 +332,12 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            {/* Show More Button Area */}
-            <div className="mt-8 w-full flex justify-center"> {/* Centered container for the button */}
-              {hasNextPage && !isLoading && ( // Show button if there's a next page and not initial loading
+            <div className="mt-8 w-full flex justify-center">
+              {hasNextPage && !isLoading && (
                 <Button
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
-                  className={`flex items-center justify-center cursor-pointer ${BUTTON_COLOR_THEMES[colorThemeIndex]} ${BUTTON_HOVER_COLOR_THEMES[colorThemeIndex]} border-4 border-black p-3 font-bold ${BUTTON_COLOR_THEMES[colorThemeIndex].startsWith('bg-yellow') ? 'text-black' : 'text-white'} transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:opacity-80 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none rounded w-full max-w-xs sm:max-w-sm`} // Added rounded, width constraints
+                  className={`flex items-center justify-center cursor-pointer ${BUTTON_COLOR_THEMES[colorThemeIndex]} ${BUTTON_HOVER_COLOR_THEMES[colorThemeIndex]} border-4 border-black p-3 font-bold ${BUTTON_COLOR_THEMES[colorThemeIndex].startsWith('bg-yellow') ? 'text-black' : 'text-white'} transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:opacity-80 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none w-full max-w-xs sm:max-w-sm`} // Added rounded, width constraints
                 >
                   {isLoadingMore ? (
                     <>
@@ -329,7 +347,7 @@ export default function Home() {
                   ) : (
                     <>
                       Show More
-                      <TbLibraryPlus className="inline-block ml-2" size={24} />
+                      <TbPlus className="inline-block ml-2" size={24} />
                     </>
                   )}
                 </Button>
