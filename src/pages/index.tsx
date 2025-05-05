@@ -4,6 +4,10 @@ import { Button, Input, Popover, PopoverButton, PopoverPanel } from '@headlessui
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { useEffect, useRef, useState } from 'react';
 import { TbArrowUpRight, TbInfoCircleFilled, TbPlus, TbLoader2, TbSparkles, TbStopwatch, TbZoomCancel } from 'react-icons/tb';
+import { gsap } from 'gsap';
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(useGSAP);
 
 interface ArtworkNode {
   internalID: string;
@@ -11,7 +15,7 @@ interface ArtworkNode {
   slug: string;
   date: string | null;
   medium: string | null;
-  artists: { name: string | null; slug: string | null }[] | null;
+  artistNames: string | null;
   image: {
     url: string | null;
     aspectRatio: number;
@@ -235,10 +239,10 @@ export default function Home({ colorThemeIndex }: InferGetServerSidePropsType<ty
   return (
     <main className={`${switzer.className} min-h-dvh flex flex-col items-center ${isFirstSearch ? 'justify-center' : 'justify-start'}`}>
       <div className={`flex flex-col items-center p-6 gap-8 w-full max-w-[1024px]`}>
-        <div className={`flex flex-col border-4 -rotate-1 p-5 min-w-full sm:min-w-lg lg:min-w-xl max-w-2xl gap-6 ${BG_COLOR_THEMES[colorThemeIndex]} relative`}>
+        <div id="search-bar" className={`flex flex-col border-4 -rotate-1 p-5 min-w-full sm:min-w-lg lg:min-w-xl max-w-2xl gap-6 ${BG_COLOR_THEMES[colorThemeIndex]} relative`}>
           <div className="absolute right-4">
             <Popover className="relative">
-              <PopoverButton className="absolute right-0 rotate-2 flex w-fit cursor-pointer hover:brightness-95 border-4 border-black p-2 text-md font-bold bg-white text-black transition-all transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <PopoverButton className="absolute right-0 rotate-2 flex w-fit cursor-pointer hover:brightness-95 border-4 border-black p-2 text-md font-bold bg-white text-black transition-all transform data-hover:-translate-y-1 data-hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] data-focus:-translate-y-1 data-focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] data-active:-translate-y-1 data-active:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 <TbInfoCircleFilled size={24} />
               </PopoverButton>
               <PopoverPanel anchor="bottom end" transition className="font-medium gap-3 sm:gap-4 flex flex-col bg-white p-4 border-4 border-black w-[225px] sm:w-[250px] mt-4 transition duration-200 ease-in-out data-closed:-translate-y-1 data-closed:opacity-0">
@@ -314,7 +318,7 @@ export default function Home({ colorThemeIndex }: InferGetServerSidePropsType<ty
                   )}
                   <div className="flex flex-col">
                     <h3 className={`${specialGothicExpandedOne.className} text-xl md:text-2xl line-clamp-3`}>{node.title || 'Untitled'}</h3>
-                    <p className="text-base md:text-lg font-semibold">{node.artists?.map(a => a.name).join(', ') || 'Unknown Artist'}</p>
+                    <p className="text-base md:text-lg font-semibold line-clamp-2">{node.artistNames || 'Unknown Artist'}</p>
                     <p className="font-medium">{node.date}</p>
                     <p className="text-sm mt-3 italic">{node.medium}</p>
                   </div>

@@ -230,7 +230,7 @@ async function queryArtsy(
               slug
               date
               medium
-              artists { name slug }
+              artistNames
               image { url(version: "large") aspectRatio }
             }
           }
