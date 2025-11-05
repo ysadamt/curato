@@ -3,7 +3,7 @@ import { getContrastTextColor, getDominantColor, isValidRgbValue } from '@/utils
 import { Button, Input, Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { useEffect, useRef, useState } from 'react';
-import { TbArrowUpRight, TbInfoCircleFilled, TbPlus, TbLoader2, TbStopwatch, TbZoomCancel, TbSearch, TbSparkles } from 'react-icons/tb';
+import { TbArrowUpRight, TbInfoCircleFilled, TbPlus, TbLoader2, TbStopwatch, TbZoomCancel, TbSearch } from 'react-icons/tb';
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react";
 
@@ -282,7 +282,7 @@ export default function Home({ colorThemeIndex }: InferGetServerSidePropsType<ty
               ) : (
                 <>
                   Search
-                  <TbSparkles className="inline-block ml-2" size={24} />
+                  <TbSearch className="inline-block ml-2" size={24} />
                 </>
               )}
             </Button>
