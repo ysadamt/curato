@@ -248,8 +248,8 @@ async function queryArtsy(
     },
   };
 
-  console.log("Executing Artsy Query:", graphqlQuery.query);
-  console.log("With Variables:", graphqlQuery.variables);
+  // console.log("Executing Artsy Query:", graphqlQuery.query);
+  // console.log("With Variables:", graphqlQuery.variables);
 
   const response = await fetch(artsyApiUrl, {
     method: "POST",

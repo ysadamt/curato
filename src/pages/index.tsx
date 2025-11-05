@@ -3,7 +3,7 @@ import { getContrastTextColor, getDominantColor, isValidRgbValue } from '@/utils
 import { Button, Input, Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { useEffect, useRef, useState } from 'react';
-import { TbArrowUpRight, TbInfoCircleFilled, TbPlus, TbLoader2, TbSparkles, TbStopwatch, TbZoomCancel } from 'react-icons/tb';
+import { TbArrowUpRight, TbInfoCircleFilled, TbPlus, TbLoader2, TbStopwatch, TbZoomCancel, TbSearch } from 'react-icons/tb';
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react";
 
@@ -247,7 +247,7 @@ export default function Home({ colorThemeIndex }: InferGetServerSidePropsType<ty
               </PopoverButton>
               <PopoverPanel anchor="bottom end" transition className="font-medium gap-3 sm:gap-4 flex flex-col bg-white p-4 border-4 border-black w-[225px] sm:w-[250px] mt-4 transition duration-200 ease-in-out data-closed:-translate-y-1 data-closed:opacity-0">
                 <p className="text-sm sm:text-base">
-                  Experience AI-powered art discovery. Powered by Google&apos;s Gemini, Curato understands your natural language descriptions to intelligently search and find artwork within the extensive Artsy database.
+                  Experience seamless art discovery. Curato understands your natural language to search and find artwork within the Artsy database.
                 </p>
                 <p className="text-xs sm:text-xs text-end">Made with ❤️ by <a href="https://ysadamt.com" target="_blank" rel="noopener noreferrer" className="underline hover:opacity-75 transition-opacity">Adam Teo</a></p>
               </PopoverPanel>
@@ -282,7 +282,7 @@ export default function Home({ colorThemeIndex }: InferGetServerSidePropsType<ty
               ) : (
                 <>
                   Search
-                  <TbSparkles className="inline-block ml-2" size={24} />
+                  <TbSearch className="inline-block ml-2" size={24} />
                 </>
               )}
             </Button>
